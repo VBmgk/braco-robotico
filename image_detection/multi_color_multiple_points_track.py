@@ -11,121 +11,79 @@ Written by Abid.K   --mail me at abidrahman2@gmail.com  '''
 ###############################################################################################################################
 
 import cv
-posx=0
-posy=0
-def getthresholdedimg(im):
-    '''this function take RGB image.Then convert it into HSV for easy colour detection and threshold it with yellow part as white and all other regions as black.Then return that image'''
+#posx=0
+#posy=0
+
+# The color ranges are in HSV space, not RGB. 
+""" Keep in mind that different applications use different scales for HSV. For example, GIMP uses:
+        H: 0-360, S: 0-100, V: 0-100
+    While OpenCv uses:
+        H: 0-180, S: 0-255, V: 0-255
+    So you can use GIMP to analyze a sample image and find out what colors you want, and then transform to OpenCv scale.
+"""
+orange_low = cv.Scalar(3,150,150)
+orange_high = cv.Scalar(13,255,255)
+
+blue_low = cv.Scalar(110,150,150)
+blue_high = cv.Scalar(130,255,255) 
+
+colors = {
+        'orange': (orange_low, orange_high),
+        'blue': (blue_low, blue_high)
+    }
+
+def getthresholdedimg(im, color_low_threshold, color_high_threshold):
+    '''this function take RGB image.Then convert it into HSV for easy colour detection and threshold it with the color chosen as white and all other regions as black.Then return that image'''
     imghsv=cv.CreateImage(cv.GetSize(im),8,3)
     cv.CvtColor(im,imghsv,cv.CV_BGR2HSV)                # Convert image from RGB to HSV
         
     # A little change here. Creates images for green,blue and yellow (or whatever color you like).
-    imgyellow=cv.CreateImage(cv.GetSize(im),8,1)
-    #imgblue=cv.CreateImage(cv.GetSize(im),8,1)
-    #imggreen=cv.CreateImage(cv.GetSize(im),8,1)
-    
+    imgcolor=cv.CreateImage(cv.GetSize(im),8,1)
     imgthreshold=cv.CreateImage(cv.GetSize(im),8,1)
     
-    #cv.InRangeS(imghsv,cv.Scalar(85,150,150),cv.Scalar(95,255,255),imggreen)
-    cv.InRangeS(imghsv,cv.Scalar(3,150,150),cv.Scalar(13,255,255),imgyellow)   # Laranja 
-    #cv.InRangeS(imghsv,cv.Scalar(110,150,150),cv.Scalar(130,255,255),imgblue)   # Azul 
-#   Add everything
-    cv.Add(imgthreshold,imgyellow,imgthreshold)
-    #cv.Add(imgyellow,imgblue,imgthreshold)
-    #cv.Add(imgthreshold,imggreen,imgthreshold)
+    cv.InRangeS(imghsv,color_low_threshold,color_high_threshold,imgcolor) 
+    cv.Add(imgthreshold,imgcolor,imgthreshold)
     return imgthreshold
 
-def run_from_img(color_image):
-    imdraw=cv.CreateImage(cv.GetSize(color_image),8,3)
-    cv.SetZero(imdraw)
-    cv.Smooth(color_image, color_image, cv.CV_GAUSSIAN, 3, 0)
-    imgyellowthresh=getthresholdedimg(color_image)
-    cv.Erode(imgyellowthresh,imgyellowthresh,None,3)
-    cv.Dilate(imgyellowthresh,imgyellowthresh,None,5)
-    img2=cv.CloneImage(imgyellowthresh)
-    storage = cv.CreateMemStorage(0)
-    contour = cv.FindContours(imgyellowthresh, storage, cv.CV_RETR_CCOMP, cv.CV_CHAIN_APPROX_SIMPLE)
-    points = [] 
-    centroids = []
+def run_from_img(original_image):
+    """ Receives an image and returns the centroids of the areas detected with the specified color.
+        To load an image and pass to this function:
+            im = cv.LoadImage("image.png")
+    """
+    centroids = {}
 
-    while contour:
-        # Draw bounding rectangles
-        bound_rect = cv.BoundingRect(list(contour))
-        
-        # for more details about cv.BoundingRect,see documentation
-        pt1 = (bound_rect[0], bound_rect[1])
-        pt2 = (bound_rect[0] + bound_rect[2], bound_rect[1] + bound_rect[3])
-        points.append(pt1)
-        points.append(pt2)
-        cv.Rectangle(color_image, pt1, pt2, cv.CV_RGB(255,0,0), 2)
-
-        # Centroid calculation
-        moment = cv.Moments(contour)
-        Cx = int(moment.m10 / moment.m00)
-        Cy = int(moment.m01 / moment.m00)
-
-        centroids.append((Cx, Cy))
-
-        contour = contour.h_next()
-
-        print "Points: ", points
-        print "Centroids: ", centroids 
-
-    cv.SaveImage("output9.png", img2)
-
-def run_from_cam():
-    capture=cv.CaptureFromCAM(0)
-    frame = cv.QueryFrame(capture)
-    frame_size = cv.GetSize(frame)
-    grey_image = cv.CreateImage(cv.GetSize(frame), cv.IPL_DEPTH_8U, 1)
-    test=cv.CreateImage(cv.GetSize(frame),8,3)
-    img2=cv.CreateImage(cv.GetSize(frame),8,3)
-    cv.NamedWindow("Real",0)
-    cv.NamedWindow("Threshold",0)
-#cv.NamedWindow("Final",0)
-    while(1):
-        color_image = cv.QueryFrame(capture)
-        imdraw=cv.CreateImage(cv.GetSize(frame),8,3)
-        cv.SetZero(imdraw)
-        cv.Flip(color_image,color_image,1)
+    for color_name, color_limits in colors.iteritems():
+        color_image = cv.CloneImage(original_image)
         cv.Smooth(color_image, color_image, cv.CV_GAUSSIAN, 3, 0)
-        imgyellowthresh=getthresholdedimg(color_image)
+        imgyellowthresh=getthresholdedimg(color_image, color_limits[0], color_limits[1])
+
         cv.Erode(imgyellowthresh,imgyellowthresh,None,3)
-        cv.Dilate(imgyellowthresh,imgyellowthresh,None,10)
-        img2=cv.CloneImage(imgyellowthresh)
+        cv.Dilate(imgyellowthresh,imgyellowthresh,None,5)
         storage = cv.CreateMemStorage(0)
         contour = cv.FindContours(imgyellowthresh, storage, cv.CV_RETR_CCOMP, cv.CV_CHAIN_APPROX_SIMPLE)
-        points = [] 
 
-
+        centroids[color_name] = []
         while contour:
-            # Draw bounding rectangles
-            bound_rect = cv.BoundingRect(list(contour))
+            # Centroid calculation
+            moment = cv.Moments(contour)
+            Cx = int(moment.m10 / moment.m00)
+            Cy = int(moment.m01 / moment.m00)
+
+            centroids[color_name].append((Cx, Cy))
+
             contour = contour.h_next()
-            
-            # for more details about cv.BoundingRect,see documentation
-            pt1 = (bound_rect[0], bound_rect[1])
-            pt2 = (bound_rect[0] + bound_rect[2], bound_rect[1] + bound_rect[3])
-            points.append(pt1)
-            points.append(pt2)
-            cv.Rectangle(color_image, pt1, pt2, cv.CV_RGB(255,0,0), 2)
 
-############### Line drawing part
+    return centroids
 
-#       lastx=posx
-#       lasty=posy
-#       posx=cv.Round((pt1[0]+pt2[0])/2)
-#       posy=cv.Round((pt1[1]+pt2[1])/2)
-#       if lastx!=0 and lasty!=0:
-#           cv.Line(imdraw,(posx,posy),(lastx,lasty),(255,255,0),3,8,0)
-#           cv.Circle(imdraw,(posx,posy),5,(0,255,255),-1)
+def run_from_cam():
+    """ This fuction keeps reading frames from the CAM and passing them to the function run_from_img, for color detection, and printing the centroids found.
+    """
+    capture=cv.CaptureFromCAM(0)
+    while(1):
+        color_image = cv.QueryFrame(capture)
+        # Mirror the image from the cam
+        cv.Flip(color_image,color_image,1)
 
-        cv.Add(test,imdraw,test)
+        centroids = run_from_img(color_image)
 
-        cv.ShowImage("Real",color_image)
-        cv.ShowImage("Threshold",img2)
-        cv.ShowImage("Final",test)
-        if cv.WaitKey(33)==1048603:
-            cv.DestroyWindow("Real")
-            cv.DestroyWindow("Threshold")
-#       cv.DestroyWindow("Final")
-            break
+        print centroids
