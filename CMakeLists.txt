@@ -59,6 +59,7 @@ add_executable(hanoisim
     src/main.cpp
     src/draw.cpp
     src/draw.h
+    src/physics.h
     src/utils/colors.h
     src/utils/gl.h
 )
