@@ -40,18 +40,12 @@ struct World {
 
   // the stuff
   btRigidBody ground_body{ground_ci};
-  btRigidBody ball_body{ball_ci};
   Robot robot;
 
   World() {
     dynamics.setGravity({0, 0, -9.80665});
     dynamics.addRigidBody(&ground_body);
-    dynamics.addRigidBody(&ball_body);
     robot.addToDynamics(&dynamics);
-
-    // drop ball from 0.0, 0.0, 1.0
-    ball_body.setWorldTransform(btTransform({0, 0, 0, 1}, {0.0, 0.0, 1.0}));
-    ball_body.activate(true);
 
     // robot
     //robot.activate();
@@ -59,7 +53,6 @@ struct World {
 
   ~World(void) {
     robot.removeBodies(&dynamics); 
-    dynamics.removeRigidBody(&ball_body);
     dynamics.removeRigidBody(&ground_body);
   }
 
