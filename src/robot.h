@@ -2,13 +2,19 @@
 #define BODY_COUNT 5
 #define JOINT_COUNT 5
 
+#define THETA_TOL M_PI/1000
+
 class Robot {
   float               links_mass[BODY_COUNT];
   btCollisionShape*	m_shapes[BODY_COUNT];
   btRigidBody*		m_bodies[BODY_COUNT];
   btTransform 	    m_transforms[JOINT_COUNT];
-  btTransform 	    offset;
-  float	                  thetas[JOINT_COUNT] = {};
+  btTransform 	                       offset;
+  Eigen::VectorXd theta;
+  std::vector< Eigen::VectorXd> theta_list;
+
+  int   curr_list_pos = 0; 
+  bool reach_final_theta = true;
   
   btRigidBody* localCreateRigidBody (btScalar mass, const btTransform& startTransform, btCollisionShape* shape) {
     bool isDynamic = (mass != 0.f);
@@ -26,6 +32,8 @@ class Robot {
 
 public:
   Robot() {
+    theta = Eigen::VectorXd(JOINT_COUNT);
+
     // Setup geometry
     m_shapes[0] = new btCylinderShapeZ(btVector3(.01,0.00,0.03)); links_mass[0] = 0.0;
     m_shapes[1] = new btCylinderShape (btVector3(.01,0.03,0.00)); links_mass[1] = 0.0;
@@ -35,18 +43,18 @@ public:
   }
 
   void setTheta(float t0, float t1, float t2, float t3, float t4) {
-    thetas[0] = t0; thetas[1] = t1; thetas[2] = t2;
-    thetas[3] = t3; thetas[4] = t4;
+    theta[0] = t0; theta[1] = t1; theta[2] = t2;
+    theta[3] = t3; theta[4] = t4;
   }
 
   void setupTransforms() {
     float h0 = .093, l1 = .080, l2 = .081, l3 = .172;
 
-    m_transforms[0] = btTransform(btQuaternion({0,0,1}, thetas[0]), {   0, 0,  0});
-    m_transforms[1] = btTransform(btQuaternion({0,1,0}, thetas[1]), {   0, 0, h0});
-    m_transforms[2] = btTransform(btQuaternion({0,1,0}, thetas[2]), { -l1, 0,  0});
-    m_transforms[3] = btTransform(btQuaternion({0,1,0}, thetas[3]), {   0, 0, l2});
-    m_transforms[4] = btTransform(btQuaternion({1,0,0}, thetas[4]), {l3/2, 0,  0});
+    m_transforms[0] = btTransform(btQuaternion({0,0,1}, theta[0]), {   0, 0,  0});
+    m_transforms[1] = btTransform(btQuaternion({0,1,0}, theta[1]), {   0, 0, h0});
+    m_transforms[2] = btTransform(btQuaternion({0,1,0}, theta[2]), { -l1, 0,  0});
+    m_transforms[3] = btTransform(btQuaternion({0,1,0}, theta[3]), {   0, 0, l2});
+    m_transforms[4] = btTransform(btQuaternion({1,0,0}, theta[4]), {l3/2, 0,  0});
   }
 
   void addRigidBodies(btTransform& _offset) {
@@ -65,15 +73,37 @@ public:
   }
 
   void moveJoint(int joint_num, float delta_ang) {
-    float new_ang = thetas[joint_num] + delta_ang;
+    float new_ang = theta[joint_num] + delta_ang;
 
     if     (new_ang > M_PI) { new_ang = M_PI; }
     else if(new_ang < 0)    { new_ang = 0;    }
 
-    thetas[joint_num] = new_ang;
+    theta[joint_num] = new_ang;
+  }
+
+  void addTheta2List(Eigen::VectorXd new_theta){
+    theta_list.push_back(new_theta);
+    reach_final_theta = false;
+  }
+ 
+  void updateState(){
+    if (theta_list.size() == 0) return;
+
+    theta +=
+      (theta_list.at(curr_list_pos + 1)
+       -   theta_list.at(curr_list_pos)) * THETA_TOL;
+
+    Eigen::VectorXd buff = theta - theta_list.at(curr_list_pos + 1);
+
+    if (std::max( std::fabs(buff.maxCoeff()),
+                  std::fabs(buff.minCoeff()) ) < THETA_TOL) {
+      reach_final_theta = (++curr_list_pos == (theta_list.size()-1));
+    }
   }
 
   void moveRobot() {
+    if( !reach_final_theta) updateState();
+
     setupTransforms();
 
     btTransform transform;
@@ -101,10 +131,6 @@ public:
     for(int i=0; i<BODY_COUNT ;i++) {
       dynamics->addRigidBody(m_bodies[i]);
     }
-
-    //for(int i=0; i<JOINT_COUNT ;i++) {
-    //  dynamics->addConstraint(m_joints[i], true);
-    //}
   }
 
   void activate() {

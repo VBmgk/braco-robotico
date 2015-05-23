@@ -12,6 +12,8 @@
 #include <stdbool.h>
 #include <chrono>
 #include <thread>
+#include <vector>
+#include <Eigen/Dense>
 
 #if 1
 #define GLEW_STATIC

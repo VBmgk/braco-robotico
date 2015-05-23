@@ -31,6 +31,10 @@ add_definitions("-D_GNU_SOURCE")
 find_package(Bullet REQUIRED)
 include_directories(SYSTEM ${BULLET_INCLUDE_DIR})
 
+# Eigen
+find_package(Eigen3 REQUIRED)
+include_directories(SYSTEM ${EIGEN3_INCLUDE_DIR})
+
 # OpenGL
 find_package(OpenGL REQUIRED)
 
@@ -68,6 +72,7 @@ add_executable(hanoisim
 target_link_libraries(hanoisim
     ${IMGUI_LIB}
     ${BULLET_LIBRARIES}
+    ${EIGEN3_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${GLEW_LIBRARIES}
     ${GLFW_STATIC_LIBRARIES}
