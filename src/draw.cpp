@@ -16,7 +16,10 @@
 #define GLFW_DLL
 #include <GLFW/glfw3.h>
 #endif
-#include <btBulletDynamicsCommon.h>
+#ifndef BULLET_DYNAMICS_COMMON
+  #define BULLET_DYNAMICS_COMMON
+  #include <btBulletDynamicsCommon.h>
+#endif
 #include <imgui.h>
 
 #include "utils/gl.h"
@@ -36,17 +39,8 @@ const float &screen_height{draw_screen_height};
 const float &screen_x{draw_screen_x};
 const float &screen_y{draw_screen_y};
 
-#if 1
-btScalar cam_ele{30.0};
-btScalar cam_azi{10.0};
-btScalar cam_dist{1.0};
-#else
-btScalar cam_ele{90.0};
-btScalar cam_azi{0.0};
-btScalar cam_dist{4.0};
-#endif
-#define CAM_ROT
 #ifdef CAM_ROT
+#define CAM_ROT
 btScalar cam_rot{0.0};
 #endif
 btVector3 cam_tar{0, 0, 0.0215};

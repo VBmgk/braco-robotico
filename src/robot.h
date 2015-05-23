@@ -51,17 +51,17 @@ public:
 
       // -- link 2
       transform.setIdentity();
-      transform.setOrigin(btVector3(btScalar(0.), btScalar(-l1), btScalar(h0)));
+      transform.setOrigin(btVector3(btScalar(-l1), btScalar(0.), btScalar(h0)));
       m_bodies[2] = localCreateRigidBody(btScalar(links_mass[2]), offset * transform, m_shapes[2]);
 
       // -- link 3
       transform.setIdentity();
-      transform.setOrigin(btVector3(btScalar(0.), btScalar(-l1), btScalar(h0 + l2)));
+      transform.setOrigin(btVector3(btScalar(-l1), btScalar(0.), btScalar(h0 + l2)));
       m_bodies[3] = localCreateRigidBody(btScalar(links_mass[3]), offset * transform, m_shapes[3]);
 
       // -- link 4
       transform.setIdentity();
-      transform.setOrigin(btVector3(btScalar(0.), btScalar(-l1 + l3/2), btScalar(h0 + l2)));
+      transform.setOrigin(btVector3(btScalar(-l1 + l3/2), btScalar(0.), btScalar(h0 + l2)));
       m_bodies[4] = localCreateRigidBody(btScalar(links_mass[4]), offset * transform, m_shapes[4]);
     
     // TODO: read manual about this

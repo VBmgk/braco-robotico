@@ -203,7 +203,6 @@ static void scroll_callback(GLFWwindow *, double, double yoffset) {
 
 static void key_callback(GLFWwindow *window, int key, int, int action,
                          int mods) {
-
   // Custom
   if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE) {
     glfwSetWindowShouldClose(window, 1);
@@ -222,9 +221,29 @@ static void key_callback(GLFWwindow *window, int key, int, int action,
     io.KeyCtrl = (mods & GLFW_MOD_CONTROL) != 0;
     io.KeyShift = (mods & GLFW_MOD_SHIFT) != 0;
 
+
   } else if (action & (GLFW_PRESS | GLFW_REPEAT)) {
     // Application
-    // TODO?
+    //switch (key) {
+    //  // zoom
+    //  case GLFW_KEY_MINUS: {
+    //    cam_dist -= 0.05;
+    //    cam_dist = (cam_dist > 0) ? cam_dist : 0.05;
+    //  } break;
+    //  case GLFW_KEY_EQUAL: { cam_dist += 0.05; } break;
+
+    //  // rotate
+    //  case GLFW_KEY_UP: { cam_ele += 1.0; } break;
+    //  case GLFW_KEY_DOWN: {
+    //    cam_ele -= 1.0;
+    //    cam_ele = (cam_ele > 0) ? cam_ele : 1.0;
+    //  } break;
+    //  case GLFW_KEY_LEFT: { cam_azi += 1.0; } break;
+    //  case GLFW_KEY_RIGHT: {
+    //    cam_azi -= 1.0;
+    //    cam_azi = (cam_azi > 0) ? cam_azi : 1.0;
+    //  } break;
+    //}
   }
 }
 
@@ -453,11 +472,7 @@ static void update_imgui(GLFWwindow *window) {
   io.MouseDown[0] = mouse_pressed[0] ||
                     glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) !=
                         0; // If a mouse press event came, always pass it as
-                           // "mouse held this frame", so we don't miss
-                           // click-release events that are shorter than 1
-                           // frame.
-  io.MouseDown[1] = mouse_pressed[1] ||
-                    glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) != 0;
+                           // "mouse held this frame", so we don't miss // click-release events that are shorter than 1 // frame.  io.MouseDown[1] = mouse_pressed[1] || glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) != 0;
 
   // Start the frame
   ImGui::NewFrame();
