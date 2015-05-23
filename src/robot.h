@@ -53,24 +53,6 @@ public:
         transform *= *m_transforms[i];
         m_bodies[i] = localCreateRigidBody(btScalar(links_mass[i]), offset * transform, m_shapes[i]);
       }
-
-    // Setup some damping on the m_bodies
-    for (int i=0; i<BODY_COUNT; ++i)
-    {
-    	m_bodies[i]->setDamping(0.05, 0.85);
-    	m_bodies[i]->setDeactivationTime(0.8);
-    	m_bodies[i]->setSleepingThresholds(0.5f, 0.5f);
-    }
-    
-    // Setup the constraints
-    //btHingeConstraint* hinge;
-    //for (int i=0; i<JOINT_COUNT ;i++) {
-    //  hinge = new btHingeConstraint(*m_bodies[i], *m_transforms[i], true);
-    //  hinge->setLimit (0, SIMD_PI);
-    //  hinge->setDbgDrawSize(btScalar(0.1f));
-
-    //  m_joints[i] = hinge;
-    //}
   }
 
   ~Robot(){
