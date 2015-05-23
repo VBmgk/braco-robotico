@@ -73,7 +73,16 @@ public:
     //}
   }
 
-  ~Robot(){}
+  ~Robot(){
+    for(int i=0; i<BODY_COUNT ;i++) {
+      delete m_shapes[i];
+      delete m_bodies[i];
+    }
+
+    for(int i=0; i<JOINT_COUNT ;i++) {
+      delete m_transforms[i];
+    }
+  }
 
   void addToDynamics(btDiscreteDynamicsWorld* dynamics) {
     for(int i=0; i<BODY_COUNT ;i++) {
