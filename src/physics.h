@@ -45,6 +45,7 @@ struct World {
   World() {
     dynamics.setGravity({0, 0, -9.80665});
     dynamics.addRigidBody(&ground_body);
+    robot.setTheta(0, -M_PI/6, 0, -M_PI/2, M_PI);
     robot.addToDynamics(&dynamics);
 
     // robot
@@ -62,6 +63,8 @@ struct World {
 
   static constexpr float default_time_step = 1.0 / 60;
   void step(float time_step=default_time_step, int max_substeps=2, float fixed_time_step=default_time_step / 2) {
+    robot.moveJoint(0, M_PI/1000);
+    robot.moveRobot();
     dynamics.stepSimulation(time_step, max_substeps, fixed_time_step);
     timestamp += time_step;
     frame_number++;
