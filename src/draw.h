@@ -25,7 +25,7 @@ extern float projected_mouse_y;
 #ifndef CAM_PAR
  #define CAM_PAR
  static btScalar cam_ele{45.0};
- static btScalar cam_azi{45.0};
+ static btScalar cam_azi{0.0};
  static btScalar cam_dist{0.6};
 #endif
 

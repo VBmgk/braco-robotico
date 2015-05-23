@@ -6,8 +6,9 @@ class Robot {
   float               links_mass[BODY_COUNT];
   btCollisionShape*	m_shapes[BODY_COUNT];
   btRigidBody*		m_bodies[BODY_COUNT];
-  btTypedConstraint*	m_joints[JOINT_COUNT];
+  //btTypedConstraint*	m_joints[JOINT_COUNT];
   btTransform*	    m_transforms[JOINT_COUNT];
+  float	                  thetas[JOINT_COUNT] = {};
   
   btRigidBody* localCreateRigidBody (btScalar mass, const btTransform& startTransform, btCollisionShape* shape) {
     bool isDynamic = (mass != 0.f);
@@ -33,38 +34,26 @@ public:
     m_shapes[3] = new btCylinderShape (btVector3(.01,0.03,0.00)); links_mass[3] = 0.0;
     m_shapes[4] = new btCylinderShapeX(btVector3(.03,0.01,0.00)); links_mass[4] = 0.0;
     
-    // Setup rigid bodies
-    btTransform offset; offset.setIdentity();
-
+    // setup transformations
     float h0 = .093;
     float l1 = .080, l2 = .081, l3 = .172;
+    m_transforms[0] = new btTransform(btQuaternion({0,0,1}, thetas[0]), {   0, 0,  0});
+    m_transforms[1] = new btTransform(btQuaternion({0,1,0}, thetas[1]), {   0, 0, h0});
+    m_transforms[2] = new btTransform(btQuaternion({0,1,0}, thetas[2]), { -l1, 0,  0});
+    m_transforms[3] = new btTransform(btQuaternion({0,1,0}, thetas[3]), {   0, 0, l2});
+    m_transforms[4] = new btTransform(btQuaternion({1,0,0}, thetas[4]), {l3/2, 0,  0});
+
+    // Setup rigid bodies
+    btTransform offset; offset.setIdentity();
     
-      // -- link 0
       btTransform transform;
       transform.setIdentity();
-      m_bodies[0] = localCreateRigidBody(btScalar(links_mass[0]), offset * transform, m_shapes[0]);
 
-      // -- link 1
-      transform.setIdentity();
-      transform.setOrigin(btVector3(btScalar(0.), btScalar(0.), btScalar(h0)));
-      m_bodies[1] = localCreateRigidBody(btScalar(links_mass[1]), offset * transform, m_shapes[1]);
+      for (int i=0; i<BODY_COUNT ;i++) {
+        transform *= *m_transforms[i];
+        m_bodies[i] = localCreateRigidBody(btScalar(links_mass[i]), offset * transform, m_shapes[i]);
+      }
 
-      // -- link 2
-      transform.setIdentity();
-      transform.setOrigin(btVector3(btScalar(-l1), btScalar(0.), btScalar(h0)));
-      m_bodies[2] = localCreateRigidBody(btScalar(links_mass[2]), offset * transform, m_shapes[2]);
-
-      // -- link 3
-      transform.setIdentity();
-      transform.setOrigin(btVector3(btScalar(-l1), btScalar(0.), btScalar(h0 + l2)));
-      m_bodies[3] = localCreateRigidBody(btScalar(links_mass[3]), offset * transform, m_shapes[3]);
-
-      // -- link 4
-      transform.setIdentity();
-      transform.setOrigin(btVector3(btScalar(-l1 + l3/2), btScalar(0.), btScalar(h0 + l2)));
-      m_bodies[4] = localCreateRigidBody(btScalar(links_mass[4]), offset * transform, m_shapes[4]);
-    
-    // TODO: read manual about this
     // Setup some damping on the m_bodies
     for (int i=0; i<BODY_COUNT; ++i)
     {
@@ -74,20 +63,14 @@ public:
     }
     
     // Setup the constraints
-    m_transforms[0] = new btTransform(btQuaternion({0,0,1}, 0.0), {0,   0,       0});
-    m_transforms[1] = new btTransform(btQuaternion({1,0,0}, 0.0), {0,   0,      h0});
-    m_transforms[2] = new btTransform(btQuaternion({1,0,0}, 0.0), {0, -l1,      h0});
-    m_transforms[3] = new btTransform(btQuaternion({1,0,0}, 0.0), {0, -l1, h0 + l2});
-    m_transforms[4] = new btTransform(btQuaternion({0,1,0}, 0.0), {0, -l1, h0 + l2});
+    //btHingeConstraint* hinge;
+    //for (int i=0; i<JOINT_COUNT ;i++) {
+    //  hinge = new btHingeConstraint(*m_bodies[i], *m_transforms[i], true);
+    //  hinge->setLimit (0, SIMD_PI);
+    //  hinge->setDbgDrawSize(btScalar(0.1f));
 
-    btHingeConstraint* hinge;
-    for (int i=0; i<JOINT_COUNT ;i++) {
-      hinge = new btHingeConstraint(*m_bodies[i], *m_transforms[i], true);
-      hinge->setLimit (0, SIMD_PI);
-      hinge->setDbgDrawSize(btScalar(0.1f));
-
-      m_joints[i] = hinge;
-    }
+    //  m_joints[i] = hinge;
+    //}
   }
 
   ~Robot(){}
