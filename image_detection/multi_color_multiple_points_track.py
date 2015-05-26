@@ -24,14 +24,26 @@ import cv
 
 delta = (5, 50, 50)
 
-orange = cv.Scalar(8,205,205)
-
-blue = cv.Scalar(112,205,205)
+orange = cv.Scalar(13,205,205)
+red = cv.Scalar(0, 205,205)
+green = cv.Scalar(68,195,167)
 
 colors = {
         'orange': orange,
-        'blue': blue
+        'green': green, 
+        'red': red
     }
+
+def run():
+    import time
+
+    capture=cv.CaptureFromCAM(1)
+    # XXX Tirar esse while caso queira detectar apenas uma vez
+    while(True):
+        for k,v in colors.iteritems():
+            run_from_cam(capture, {k:v})
+        # XXX Mudar aqui o tempo de espera até pegar o próxima frame
+        time.sleep(1)
 
 def getthresholdedimg(im, color):
     '''this function take RGB image.Then convert it into HSV for easy colour detection and threshold it with the color chosen as white and all other regions as black.Then return that image'''
@@ -49,7 +61,7 @@ def getthresholdedimg(im, color):
     cv.Add(imgthreshold,imgcolor,imgthreshold)
     return imgthreshold
 
-def run_from_img(original_image):
+def run_from_img(original_image, colors):
     """ Receives an image and returns the centroids of the areas detected with the specified color.
         To load an image and pass to this function:
             im = cv.LoadImage("image.png")
@@ -86,32 +98,37 @@ def run_from_img(original_image):
 
     return centroids, thresholded_imgs
 
-def run_from_cam():
+def run_from_cam(capture, colors):
     """ This fuction keeps reading frames from the CAM and passing them to the function run_from_img, for color detection, and printing the centroids found.
     """
     #import time
 
-    capture=cv.CaptureFromCAM(1)
-    cv.NamedWindow("Real", 0)
-    for color in colors.keys():
-        cv.NamedWindow(color, 0)
+    #capture=cv.CaptureFromCAM(0)
+    #cv.NamedWindow("Real", 0)
+    #for color in colors.keys():
+    #    cv.NamedWindow(color, 0)
 
     #while(1):
     color_image = cv.QueryFrame(capture)
     # Mirror the image from the cam
     cv.Flip(color_image,color_image,1)
 
-    centroids, thresholded_imgs = run_from_img(color_image)
+    centroids, thresholded_imgs = run_from_img(color_image, colors)
 
     print centroids
 
-    cv.ShowImage("Real", color_image)
     for color in colors.keys():
-        cv.ShowImage(color, thresholded_imgs[color])
+        cv.SaveImage("Real_"+color+".png", color_image)
+        cv.SaveImage(color+".png", thresholded_imgs[color])
 
-    if cv.WaitKey(33)==1048603:
-        cv.DestroyWindow("Real")
-        for color in colors.keys():
-            cv.DestroyWindow(color)
+    # Para mostrar as imagens em janelas
+    #cv.ShowImage("Real", color_image)
+    #for color in colors.keys():
+    #    cv.ShowImage(color, thresholded_imgs[color])
 
-        #time.sleep(1)
+    #if cv.WaitKey(33)==1048603:
+    #    cv.DestroyWindow("Real")
+    #    for color in colors.keys():
+    #        cv.DestroyWindow(color)
+
+    #time.sleep(0.5)
