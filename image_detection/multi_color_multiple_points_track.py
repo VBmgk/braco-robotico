@@ -1,3 +1,5 @@
+#coding: UTF-8
+
 '''multi_color_multiple_points_track.py
 
 In single_color_multiple_points_track.py, we tracked multiple points of same color. Now you can see with a very small modification, we can track multiple points with different colors. It is very simple.
@@ -38,6 +40,9 @@ def run():
     import time
 
     capture=cv.CaptureFromCAM(1)
+    cv.NamedWindow("Real", 0)
+    for color in colors.keys():
+        cv.NamedWindow(color, 0)
     # XXX Tirar esse while caso queira detectar apenas uma vez
     while(True):
         for k,v in colors.iteritems():
@@ -104,9 +109,6 @@ def run_from_cam(capture, colors):
     #import time
 
     #capture=cv.CaptureFromCAM(0)
-    #cv.NamedWindow("Real", 0)
-    #for color in colors.keys():
-    #    cv.NamedWindow(color, 0)
 
     #while(1):
     color_image = cv.QueryFrame(capture)
@@ -122,13 +124,14 @@ def run_from_cam(capture, colors):
         cv.SaveImage(color+".png", thresholded_imgs[color])
 
     # Para mostrar as imagens em janelas
-    #cv.ShowImage("Real", color_image)
-    #for color in colors.keys():
-    #    cv.ShowImage(color, thresholded_imgs[color])
+    cv.ShowImage("Real", color_image)
+    for color in colors.keys():
+        cv.ShowImage(color, thresholded_imgs[color])
 
-    #if cv.WaitKey(33)==1048603:
-    #    cv.DestroyWindow("Real")
-    #    for color in colors.keys():
-    #        cv.DestroyWindow(color)
+    # Isso é necessário para que as janelas apareçam
+    if cv.WaitKey(33)==1048603:
+        cv.DestroyWindow("Real")
+        for color in colors.keys():
+            cv.DestroyWindow(color)
 
     #time.sleep(0.5)
