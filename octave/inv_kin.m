@@ -79,7 +79,13 @@ function [theta_k, erro_R, erro_p] = inv_kin(vec_w, vec_q, R0, p0, Rd, pd, N, TO
 
     theta_k = z + theta_k;
 
-    % normalization
+    % normalization [-2.pi, 2.pi]
+    theta_k = theta_k - 2 * pi * fix(theta_k / (2 * pi));
+
+    % [0, 4.pi]
+    theta_k = theta_k + 2 * pi;
+
+    % [0, 2.pi]
     theta_k = theta_k - 2 * pi * fix(theta_k / (2 * pi));
 
     erro_R = norm(R_f,inf);
