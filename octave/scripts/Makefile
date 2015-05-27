@@ -1,4 +1,15 @@
-SRC=expmat_w.cpp
+CXX ?= clang++-3.6
+BOOST_DIR ?= boost_dir
+PREFIX_DIR ?= prefix_dir
 
-all:
-	clang++-3.6 $(SRC) -Wall -o out -std=c++11 -Iboost_dir/include -Iprefix_dir/include -Lprefix_dir/lib -lmat2cpp -llapack
+SRC = main.cpp
+LIBS = -lmat2cpp -llapack
+CXXFLAGS = -Wall -std=c++11 -g -O3
+EXEC = solver
+
+$(EXEC): $(SRC) Makefile
+	$(CXX) $(SRC) -o $(EXEC) $(CXXFLAGS) -isystem $(BOOST_DIR)/include -isystem $(PREFIX_DIR)/include -L$(PREFIX_DIR)/lib $(LIBS)
+
+.PHONY: run
+run: $(EXEC)
+	./$(EXEC)
