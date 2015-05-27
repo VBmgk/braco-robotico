@@ -13,8 +13,6 @@ Written by Abid.K   --mail me at abidrahman2@gmail.com  '''
 ###############################################################################################################################
 
 import cv
-#posx=0
-#posy=0
 
 # The color ranges are in HSV space, not RGB. 
 """ Keep in mind that different applications use different scales for HSV. For example, GIMP uses:
@@ -24,31 +22,58 @@ import cv
     So you can use GIMP to analyze a sample image and find out what colors you want, and then transform to OpenCv scale.
 """
 
+
+# Define here your colors on GIMP HSV scale
+orange = cv.Scalar(26,87,95)
+red = cv.Scalar(0, 84,91)
+green = cv.Scalar(136,78,67)
+
+
+def GIMPtoOpenCV(gimp_color):
+    opencv_color = cv.Scalar(gimp_color[0]/2.0, gimp_color[1]*2.55, gimp_color[2]*2.55)
+
+    return opencv_color
+
 delta = (5, 50, 50)
 
-orange = cv.Scalar(13,205,205)
-red = cv.Scalar(0, 205,205)
-green = cv.Scalar(68,195,167)
-
 colors = {
-        'orange': orange,
-        'green': green, 
-        'red': red
+        'orange': GIMPtoOpenCV(orange),
+        'green': GIMPtoOpenCV(green),
+        'red': GIMPtoOpenCV(red)
     }
 
+px = 0 
+py = 300 
+
 def run():
-    import time
+    from math import pi
 
     capture=cv.CaptureFromCAM(1)
-    cv.NamedWindow("Real", 0)
-    for color in colors.keys():
-        cv.NamedWindow(color, 0)
-    # XXX Tirar esse while caso queira detectar apenas uma vez
-    while(True):
-        for k,v in colors.iteritems():
-            run_from_cam(capture, {k:v})
-        # XXX Mudar aqui o tempo de espera até pegar o próxima frame
-        time.sleep(1)
+    # Pego essa imagem só pra saber o tamanho das imagens
+    im = cv.QueryFrame(capture)
+    im_height = im.height
+    im_width = im.width
+
+    #cv.NamedWindow("Real", 0)
+    #for color in colors.keys():
+    #    cv.NamedWindow(color, 0)
+    for k,v in colors.iteritems():
+        centroids = run_from_cam(capture, {k:v})[k]
+        if centroids:
+            for centroid in centroids:
+                position = transformation(pi, centroid[0]/float(im_width), centroid[1]/float(im_height), centroid[0], centroid[1], px, py)
+                print '{} {} {} {} {}'.format(k, centroid[0], centroid[1], position[0], position[1])
+        else:
+            centroid = (0,0)
+            position = (0,0)
+            print '{} {} {} {} {}'.format(k, centroid[0], centroid[1], position[0], position[1])
+
+def transformation(theta, alpha, beta, cx, cy, px, py):
+    from math import cos, sin
+    w = cos(theta)*alpha*cx - sin(theta)*beta*cy + px
+    h = sin(theta)*alpha*cx + cos(theta)*beta*cy + py
+
+    return (w,h)
 
 def getthresholdedimg(im, color):
     '''this function take RGB image.Then convert it into HSV for easy colour detection and threshold it with the color chosen as white and all other regions as black.Then return that image'''
@@ -117,21 +142,24 @@ def run_from_cam(capture, colors):
 
     centroids, thresholded_imgs = run_from_img(color_image, colors)
 
-    print centroids
-
-    for color in colors.keys():
-        cv.SaveImage("Real_"+color+".png", color_image)
-        cv.SaveImage(color+".png", thresholded_imgs[color])
+    # Para salvar as imagens em arquivos
+    #for color in colors.keys():
+    #    cv.SaveImage("Real_"+color+".png", color_image)
+    #    cv.SaveImage(color+".png", thresholded_imgs[color])
 
     # Para mostrar as imagens em janelas
-    cv.ShowImage("Real", color_image)
-    for color in colors.keys():
-        cv.ShowImage(color, thresholded_imgs[color])
+    # cv.ShowImage("Real", color_image)
+    # for color in colors.keys():
+    #    cv.ShowImage(color, thresholded_imgs[color])
 
     # Isso é necessário para que as janelas apareçam
-    if cv.WaitKey(33)==1048603:
-        cv.DestroyWindow("Real")
-        for color in colors.keys():
-            cv.DestroyWindow(color)
+    # if cv.WaitKey(33)==1048603:
+    #    cv.DestroyWindow("Real")
+    #     for color in colors.keys():
+    #        cv.DestroyWindow(color)
+
+    return centroids
 
     #time.sleep(0.5)
+
+run()
