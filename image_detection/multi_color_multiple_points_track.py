@@ -13,8 +13,6 @@ Written by Abid.K   --mail me at abidrahman2@gmail.com  '''
 ###############################################################################################################################
 
 import cv
-#posx=0
-#posy=0
 
 # The color ranges are in HSV space, not RGB. 
 """ Keep in mind that different applications use different scales for HSV. For example, GIMP uses:
@@ -36,19 +34,42 @@ colors = {
         'red': red
     }
 
+px = 0 
+py = 300 
+
 def run():
     import time
+    from math import pi
 
     capture=cv.CaptureFromCAM(1)
+    # Pego essa imagem só pra saber o tamanho das imagens
+    im = cv.QueryFrame(capture)
+    im_height = im.height
+    im_width = im.width
+
     cv.NamedWindow("Real", 0)
     for color in colors.keys():
         cv.NamedWindow(color, 0)
     # XXX Tirar esse while caso queira detectar apenas uma vez
     while(True):
         for k,v in colors.iteritems():
-            run_from_cam(capture, {k:v})
-        # XXX Mudar aqui o tempo de espera até pegar o próxima frame
+            centroid = run_from_cam(capture, {k:v})[k]
+            if centroid:
+                centroid = centroid[0]
+                position = transformation(pi, centroid[0]/float(im_width), centroid[1]/float(im_height), centroid[0], centroid[1], px, py)
+            else:
+                position = ()
+            print '{}: {}, {}'.format(k, centroid, position)
+        print
+        # XXX Mudar aqui o tempo de espera até pegar o próximo frame
         time.sleep(1)
+
+def transformation(theta, alpha, beta, cx, cy, px, py):
+    from math import cos, sin
+    w = cos(theta)*alpha*cx - sin(theta)*beta*cy + px
+    h = sin(theta)*alpha*cx + cos(theta)*beta*cy + py
+
+    return (w,h)
 
 def getthresholdedimg(im, color):
     '''this function take RGB image.Then convert it into HSV for easy colour detection and threshold it with the color chosen as white and all other regions as black.Then return that image'''
@@ -117,11 +138,10 @@ def run_from_cam(capture, colors):
 
     centroids, thresholded_imgs = run_from_img(color_image, colors)
 
-    print centroids
-
-    for color in colors.keys():
-        cv.SaveImage("Real_"+color+".png", color_image)
-        cv.SaveImage(color+".png", thresholded_imgs[color])
+    # Para salvar as imagens em arquivos
+    #for color in colors.keys():
+    #    cv.SaveImage("Real_"+color+".png", color_image)
+    #    cv.SaveImage(color+".png", thresholded_imgs[color])
 
     # Para mostrar as imagens em janelas
     cv.ShowImage("Real", color_image)
@@ -133,5 +153,7 @@ def run_from_cam(capture, colors):
         cv.DestroyWindow("Real")
         for color in colors.keys():
             cv.DestroyWindow(color)
+
+    return centroids
 
     #time.sleep(0.5)
