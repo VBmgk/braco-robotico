@@ -1,8 +1,10 @@
 // TODO: add tool body
+#include <iostream>
 #define BODY_COUNT 5
 #define JOINT_COUNT 5
 
-#define THETA_TOL M_PI/1000
+#define N_SUB_THETAS 200
+#define THETA_TOL M_PI/180
 
 class Robot {
   float               links_mass[BODY_COUNT];
@@ -42,11 +44,6 @@ public:
     m_shapes[4] = new btCylinderShapeX(btVector3(.03,0.01,0.00)); links_mass[4] = 0.0;
   }
 
-  void setTheta(float t0, float t1, float t2, float t3, float t4) {
-    theta[0] = t0; theta[1] = t1; theta[2] = t2;
-    theta[3] = t3; theta[4] = t4;
-  }
-
   void setupTransforms() {
     float h0 = .093, l1 = .080, l2 = .081, l3 = .172;
 
@@ -84,6 +81,9 @@ public:
   void addTheta2List(Eigen::VectorXd new_theta){
     theta_list.push_back(new_theta);
     reach_final_theta = false;
+
+    // initial position
+    if(theta_list.size() == 1) theta = theta_list.at(0);
   }
  
   void updateState(){
@@ -91,9 +91,10 @@ public:
 
     theta +=
       (theta_list.at(curr_list_pos + 1)
-       -   theta_list.at(curr_list_pos)) * THETA_TOL;
+       -   theta_list.at(curr_list_pos)) * (1.0/N_SUB_THETAS);
 
     Eigen::VectorXd buff = theta - theta_list.at(curr_list_pos + 1);
+    std::cout << buff << "curr: " << curr_list_pos << std::endl;
 
     if (std::max( std::fabs(buff.maxCoeff()),
                   std::fabs(buff.minCoeff()) ) < THETA_TOL) {
