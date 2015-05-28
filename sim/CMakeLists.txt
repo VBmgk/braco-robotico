@@ -1,8 +1,7 @@
 cmake_minimum_required(VERSION 2.8.10)
 
-project(ssl-sim)
-set(DESCRIPTION "Small Size League Simulator (Experimental)")
-
+project(hanoisim)
+set(DESCRIPTION "Hanoi 6-DOF Simulator")
 
 option(BUILD_CLI "Build command line interface" ON)
 option(BUILD_GUI "Build graphical user interface (requires OpenGL+GLFW)" ON)
@@ -10,6 +9,7 @@ option(BUILD_GUI "Build graphical user interface (requires OpenGL+GLFW)" ON)
 # Super strict warnings =)
 set(CMAKE_CXX_FLAGS "-Wall -Wextra -pedantic -pedantic-errors ${CMAKE_CXX_FLAGS}")
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 include(${PROJECT_SOURCE_DIR}/cmake/Utils.cmake)
 standard_config()
 #standard_paths(${PROJECT_SOURCE_DIR} bin lib)

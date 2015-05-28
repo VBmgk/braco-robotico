@@ -15,7 +15,7 @@ class Robot {
   Eigen::VectorXd     theta;
   std::vector< Eigen::VectorXd> theta_list;
 
-  int  curr_list_pos = 0;
+  size_t curr_list_pos = 0;
   bool reach_final_theta = true;
 
   btRigidBody* localCreateRigidBody(btScalar mass, const btTransform& startTransform, btCollisionShape* shape) {
