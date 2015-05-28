@@ -11,21 +11,52 @@
 
 typedef enum Pin_pos { PIN_A, PIN_B, PIN_C } Pin_pos;
 
-// static!!!! variables w, q, and previous points here should go here
+static mat w(5, 3);
+static mat q(5, 3);
+static mat R0(3, 3);
+static vec p0(3);
+static vec t0(5);
+
 void solve_init(void) {
-  // initialize w, q, ..., here
+  const num h = 93, l1 = 80, h2 = h + 81, l3 = 172 - l1;
+  w <<= 0, 0, 1, -1, 0, 0, -1, 0, 0, -1, 0, 0, 0, 1, 0;
+  q <<= 0, 0, 0, 0, 0, h, 0, -l1, h, 0, -l1, h2, 0, -l1, h2;
+  R0 = iden(3);
+  p0 <<= 0, l3, h2;
+  t0 <<= M_PI_2, 0, 0, 0, 0;
 }
 
-std::vector<float> solve(float x, float y, float z) {
+std::vector<std::vector<float>> solve(float x, float y, float z) {
   static bool init = false;
+  static float px, py, pz;
+
+  std::vector<std::vector<float>> ts{};
+  mat lines;
+  vec p_init(3);
+  vec pf(3);
+
   if (!init) {
     init = true;
     solve_init();
+    goto over_and_out;
   }
 
-  // use follow_line with next point and update previous point
-  std::vector<float> t = {0, 0, 0, 0, 0};
-  return t;
+  p_init <<= px, py, pz;
+  pf <<= x, y, z;
+
+  lines = follow_line(p_init, pf, 5, R0, w, q, R0, p0);
+  for (int i = 0; i < lines.size1(); i++) {
+    std::vector<float> t;
+    for (int j = 0; j < 5; j++)
+      t.push_back(lines(i, j));
+    ts.push_back(t);
+  }
+
+over_and_out:
+  px = x;
+  py = y;
+  pz = z;
+  return ts;
 }
 
 class Pin {
@@ -57,14 +88,17 @@ public:
   void send(std::string command) { std::cout << "@" + command + "@\n"; }
 
   void goTo(float x, float y, float z) {
-    std::vector<float> theta = solve(x, y, z);
+    std::vector<std::vector<float>> thetas = solve(x, y, z);
 
-    std::string command =
-        std::to_string(theta[0]) + " " + std::to_string(theta[1]) +
-        " " + std::to_string(theta[2]) + " " +
-        std::to_string(theta[3]) + " " + std::to_string(theta[4]);
-
-    send(command);
+    for (int i = 0; i < thetas.size(); i++) {
+      auto theta = thetas[i];
+      std::string command =
+          std::to_string(theta[0]) + " " + std::to_string(theta[1]) +
+          " " + std::to_string(theta[2]) + " " +
+          std::to_string(theta[3]) + " " + std::to_string(theta[4]);
+      send(command);
+      // TODO: sleepmaybe???
+    }
   }
 
   void closeGripper() { send("close"); }
@@ -129,6 +163,8 @@ public:
 int main(void) {
   Pin p_a(PIN_A, -70, 290, 3), p_b(PIN_B, 0, 290, 0),
       p_c(PIN_C, 70, 290, 0);
+
+  // TODO: call solve with initial position
 
   Robot robot(p_a, p_b, p_c);
 
