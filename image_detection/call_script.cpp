@@ -92,14 +92,13 @@ int main(){
   
   char color_name[64];
   int cx, cy, img_h, img_w;
-  double tx, ty, real_w = 430, real_h = 260, px=0, py=0;
+  double tx, ty;
   fscanf(in, "%d %d", &img_h, &img_w);
   cout << img_h << " " << img_w << endl;
   
   while(fscanf(in, "%s %d %d %lf %lf", color_name, &cx, &cy, &tx, &ty)!=EOF){
-    cout << color_name << " " << cx * real_w / img_w 
-                         << " " << cy * real_h / img_h
-                         << " " << tx << " " << ty << endl;
+    cout << color_name << " " << cx << " " << cy
+                       << " " << tx << " " << ty << endl;
 
     // Collecting data to covert points coordinates
     if (strcmp(color_name, "red") == 0) { addToMarks(cx, cy); }
