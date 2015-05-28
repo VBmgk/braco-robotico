@@ -43,9 +43,14 @@ find_package(GLEW REQUIRED)
 include_directories(SYSTEM ${GLEW_INCLUDE_DIRS})
 
 # GLFW
-find_package(PkgConfig REQUIRED)
-pkg_search_module(GLFW REQUIRED glfw3)
-include_directories(SYSTEM ${GLFW_INCLUDE_DIRS})
+#find_package(PkgConfig REQUIRED)
+#pkg_search_module(GLFW REQUIRED glfw3)
+#include_directories(SYSTEM ${GLFW_INCLUDE_DIRS})
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "")
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "")
+set(GLFW_INSTALL OFF CACHE BOOL "")
+add_subdirectory(vendor/glfw)
+include_directories(vendor/glfw/include)
 
 # ImGui
 include_directories(SYSTEM imgui)
@@ -75,7 +80,8 @@ target_link_libraries(hanoisim
     ${EIGEN3_LIBRARIES}
     ${OPENGL_LIBRARIES}
     ${GLEW_LIBRARIES}
-    ${GLFW_STATIC_LIBRARIES}
+    ${GLFW_LIBRARIES}
+    glfw
 )
 
 add_custom_target(run
