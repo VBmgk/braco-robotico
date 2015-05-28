@@ -61,17 +61,17 @@ def run():
         centroids = run_from_cam(capture, {k:v})[k]
         if centroids:
             for centroid in centroids:
-                position = transformation(pi, centroid[0]/float(im_width), centroid[1]/float(im_height), centroid[0], centroid[1], px, py)
+                position = transformation(pi, centroid[0]/float(im_width), centroid[1]/float(im_height), centroid[0], centroid[1])
                 print '{} {} {} {} {}'.format(k, centroid[0], centroid[1], position[0], position[1])
         else:
             centroid = (0,0)
             position = (0,0)
             print '{} {} {} {} {}'.format(k, centroid[0], centroid[1], position[0], position[1])
 
-def transformation(theta, alpha, beta, cx, cy, px, py):
+def transformation(theta, alpha, beta, cx, cy):
     from math import cos, sin
-    w = cos(theta)*alpha*cx - sin(theta)*beta*cy + px
-    h = sin(theta)*alpha*cx + cos(theta)*beta*cy + py
+    w = cos(theta)*alpha*cx - sin(theta)*beta*cy
+    h = sin(theta)*alpha*cx + cos(theta)*beta*cy
 
     return (w,h)
 
