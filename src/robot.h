@@ -8,27 +8,27 @@
 
 class Robot {
   float               links_mass[BODY_COUNT];
-  btCollisionShape*	m_shapes[BODY_COUNT];
-  btRigidBody*		m_bodies[BODY_COUNT];
-  btTransform 	    m_transforms[JOINT_COUNT];
-  btTransform 	                       offset;
-  Eigen::VectorXd theta;
+  btCollisionShape*   m_shapes[BODY_COUNT];
+  btRigidBody*        m_bodies[BODY_COUNT];
+  btTransform         m_transforms[JOINT_COUNT];
+  btTransform         offset;
+  Eigen::VectorXd     theta;
   std::vector< Eigen::VectorXd> theta_list;
 
-  int   curr_list_pos = 0; 
+  int  curr_list_pos = 0;
   bool reach_final_theta = true;
-  
-  btRigidBody* localCreateRigidBody (btScalar mass, const btTransform& startTransform, btCollisionShape* shape) {
+
+  btRigidBody* localCreateRigidBody(btScalar mass, const btTransform& startTransform, btCollisionShape* shape) {
     bool isDynamic = (mass != 0.f);
- 
+
     btVector3 localInertia(0,0,0);
     if (isDynamic)
-    	shape->calculateLocalInertia(mass,localInertia);
-    
+      shape->calculateLocalInertia(mass,localInertia);
+
     btDefaultMotionState* myMotionState = new btDefaultMotionState(startTransform);
     btRigidBody::btRigidBodyConstructionInfo rbInfo(mass,myMotionState,shape,localInertia);
     btRigidBody* body = new btRigidBody(rbInfo);
-    
+
     return body;
   }
 
@@ -85,7 +85,7 @@ public:
     // initial position
     if(theta_list.size() == 1) theta = theta_list.at(0);
   }
- 
+
   void updateState(){
     if (theta_list.size() == 0) return;
 
@@ -126,7 +126,7 @@ public:
 
   void addToDynamics(btDiscreteDynamicsWorld* dynamics) {
     btTransform offset; offset.setIdentity();
-    
+
     // setup transformations
     addRigidBodies(offset);
     for(int i=0; i<BODY_COUNT ;i++) {

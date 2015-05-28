@@ -45,6 +45,8 @@ struct World {
   World() {
     dynamics.setGravity({0, 0, -9.80665});
     dynamics.addRigidBody(&ground_body);
+
+#if 0
     Eigen::VectorXd angles(5);
     angles[0] = 0; angles[1] = 0;
     angles[2] = 0; angles[3] = 0;
@@ -54,6 +56,27 @@ struct World {
     angles[0] = M_PI; robot.addTheta2List(angles);
     angles[1] = M_PI; robot.addTheta2List(angles);
     angles[2] = M_PI; robot.addTheta2List(angles);
+#endif
+
+    double _a[][] = {
+      {6.28319,1.68336,3.04763,1.5522,6.28319},
+      {0,1.82391,2.93231,1.52697,0},
+      {0,1.96737,2.83413,1.48168,0},
+      {0,2.11413,2.75346,1.41559,0},
+      {0,2.26334,2.69129,1.32856,0},
+      {0,2.41261,2.64894,1.22163,0},
+      {0,2.55807,2.62763,1.09749,0},
+      {0,2.6948,2.62807,0.960317,0},
+      {0,2.8178,2.65024,0.815146,0},
+      {0,2.92299,2.6934,0.666794,0}
+    };
+
+    for (int i = 0; i < 10; i++) {
+      Eigen::VectorXd angles(5);
+      for (int j = 0; j < 5; j++)
+        angles[j] = _a[i][j];
+      robot.addTheta2List(angles);
+    }
 
     robot.addToDynamics(&dynamics);
     robot.activate();
