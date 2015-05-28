@@ -2,7 +2,7 @@ function thetas = follow_line(p_init, pf, n_points, Rd, vec_w, vec_q, N, R0, p0)
   points = line_points(p_init, pf, n_points);
   thetas = zeros(N, n_points);
   iterations_num = 0;
-   
+
   MAX_ERRO_P = .005;% mm
   MAX_ERRO_R = pi/200;% rad
 

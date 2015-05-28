@@ -1,7 +1,7 @@
 % Inverse kinematics using newton's numerical method
 % for non-linear system of equations
-% 
-% Reference 
+%
+% Reference
 %   Title:  Métodos de Cãlculo Numérico
 %   Author: José Paulo P. Dieguez
 
@@ -16,7 +16,7 @@ function [theta_k, erro_R, erro_p] = inv_kin(vec_w, vec_q, R0, p0, Rd, pd, N, TO
 
   % Jacobian matrix
   J = zeros(12, N);
-  
+
   % column vector buffers
   z = zeros(N,1);
   f = zeros(12,1);
@@ -58,10 +58,10 @@ function [theta_k, erro_R, erro_p] = inv_kin(vec_w, vec_q, R0, p0, Rd, pd, N, TO
       %     R^k( theta^k + delta theta_i) + R^k( theta^k - delta theta_i)
       %    ---------------------------------------------------------------
       %                        2 tol
-      
+
       [R_k_i_p, p_k_i_p] = dir_kin(vec_w, vec_q, theta_k_i_p, N, R0, p0);
       [R_k_i_n, p_k_i_n] = dir_kin(vec_w, vec_q, theta_k_i_n, N, R0, p0);
-      
+
       delta_i_R_k = (R_k_i_p - R_k_i_n) / (2 * TOL);
       delta_i_p_k = (p_k_i_p - p_k_i_n) / (2 * TOL);
 
@@ -70,7 +70,7 @@ function [theta_k, erro_R, erro_p] = inv_kin(vec_w, vec_q, R0, p0, Rd, pd, N, TO
       J(7,i)  = delta_i_R_k (3,1); J(8,i)  = delta_i_R_k (3,2); J(9,i)  = delta_i_R_k (3,3);
       J(10,i) = delta_i_p_k (1);   J(11,i) = delta_i_p_k (2);   J(12,i) = delta_i_p_k (3);
     end
-    
+
     % As the system may not have J square, it is necessary
     % to rearenge it:
     %

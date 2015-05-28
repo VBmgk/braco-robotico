@@ -8,4 +8,4 @@ function [R, p] = expmat_wv(w, q, theta)
 
   v = - W * transpose(q);
   p = (I - R) * W * v + transpose(w) * w * v * theta;
-endfunction 
+endfunction
